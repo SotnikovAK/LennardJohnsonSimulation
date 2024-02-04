@@ -20,13 +20,12 @@ void SpecialWritingFunction::PrintDiffusion(int t, std::list<ElementarElement> E
 {
 	WritingData file("./DATA/Dispersia.txt");
 
-	float SumDiff = 0.0;
+	float SumDisp = 0.0;
 	for (auto element = ElementList.begin(); element != ElementList.end(); element++)
 	{
-		SumDiff += element->Disp();
+		SumDisp += element->Disp();
 	}
-	SumDiff /= ElementList.size();
-	file.printing(std::to_string(t) + " " + std::to_string(SumDiff) );
+	file.printing(std::to_string(t) + " " + std::to_string(SumDisp/ElementList.size()) );
 
 }
 
