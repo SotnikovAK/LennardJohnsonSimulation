@@ -11,7 +11,7 @@ with open('./DATA/Energy.txt', 'r') as file:
         X.append(A[0])
         Y.append(A[1])
         Z.append(A[2])
-        E.append(A[2] + A[1])
+        E.append(A[2] - A[1])
 
 
 plt.plot(X,Y, label='T')
