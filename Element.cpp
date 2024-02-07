@@ -2,19 +2,6 @@
 #include "Quaternion.h"
 
 
-static float ForceDependence(float ro) {
-	float f1 = 0.0;
-	float f2 = 0.0;
-
-	f1 = 48 * pow(alpha, 12) / pow(ro, 7);
-	f2 = -24 * pow(alpha, 6) / pow(ro, 4);
-
-	return f1 + f2;
-
-}
-
-
-
 
 ElementarElement::ElementarElement(float x_, float y_, float z_, float Vx_, float Vy_, float Vz_, float land_, float _la)
 {
