@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Element.h"
-#include "WritingData.h"
 
 class Simulation
 {
