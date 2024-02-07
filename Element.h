@@ -52,8 +52,6 @@ public:
 
     void Cout(int t);
 
-    float Force(ElementarElement* element);
-
     void ThermoV();
 
     float KinEnergy();
@@ -71,4 +69,3 @@ public:
     void draw(sf::RenderWindow& window);
 
 };
-float moving(std::list<ElementarElement> ElementList, float Border, int t);
