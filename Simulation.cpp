@@ -28,11 +28,7 @@ static float force(float delta_coord[3]) {
     }
     return absF;
 }
-static float EnergyDependence(float ro) {
-    float U = 0.0;
-    U = 4 * (pow(alpha, 12) / pow(ro, 6) - pow(alpha, 6) / pow(ro, 3));
-    return U;
-}
+
 
 
 void Simulation::WindowInteraction()
@@ -141,7 +137,9 @@ void Simulation::WindowInteraction()
                     W[1] += absF * delta_coord[1];
                     W[2] += absF * delta_coord[2];
 
-                    U += EnergyDependence(pow(delta_coord[0], 2) + pow(delta_coord[1], 2) + pow(delta_coord[2], 2));
+                    if (pow(delta_coord[0], 2) + pow(delta_coord[1], 2) + pow(delta_coord[2], 2) > 0) {
+                        U += 4 * (pow(alpha, 12) / pow(pow(delta_coord[0], 2) + pow(delta_coord[1], 2) + pow(delta_coord[2], 2), 6) - pow(alpha, 6) / pow(pow(delta_coord[0], 2) + pow(delta_coord[1], 2) + pow(delta_coord[2], 2), 3));
+                    }
 
                 }
                 element->Starting_conditions_for_W(W);
