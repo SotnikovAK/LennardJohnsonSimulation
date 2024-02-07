@@ -52,83 +52,6 @@ void ElementarElement::Move()
 
 	std::tie(DispX, DispY, DispZ) = std::make_tuple(Vx, Vy, Vz);
 }
-static float force(float delta_coord[3]) {
-	float absF = 0.0;
-	if (pow(delta_coord[0], 2) + pow(delta_coord[1], 2) + pow(delta_coord[2], 2) < FinishForceRo and pow(delta_coord[0], 2) + pow(delta_coord[1], 2) + pow(delta_coord[2], 2) > 0) {
-		absF = ForceDependence(pow(delta_coord[0], 2) + pow(delta_coord[1], 2) + pow(delta_coord[2], 2));
-	}
-	return absF;
-}
-
-
-float moving(std::list<ElementarElement> ElementList, float Border, int timer)
-{
-
-	float A[9][2] = {
-		{-1.0, -1.0},
-		{-1.0, 0.0},
-		{-1.0, 1.0},
-		{0.0, -1.0},
-		{0.0,0.0},
-		{0.0, 1.0},
-		{1.0, -1.0},
-		{1.0, 0.0},
-		{1.0, 1.0},
-	};
-	float B[3] = { -1.0,0.0,1.0 };
-	float deltaW = 0.0f;
-	float absF = 0.0f;
-
-	float X[max_n];
-	float Y[max_n];
-	float Z[max_n];
-
-	int t = 0;
-	for (auto element = ElementList.begin(); element != ElementList.end(); ++element) {
-		for (int i = 0; i < 3; ++i) {
-			for (int k = 0; k < 9; ++k) {
-				std::tie(X[t], Y[t], Z[t]) = std::make_tuple(A[k][0] * Border + element->x, A[k][1] * Border + element->y, B[i] * Border + element->z);
-				++t;
-			}
-		}
-	}
-
-	for (auto element = ElementList.begin(); element != ElementList.end(); ++element) {
-		float W[3] = { 0.0f,0.0f,0.0f };
-		for (int k = 0; k < t; ++k) {
-			float delta_coord[3] = { element->x - X[k], element->y - Y[k], element->z - Z[k] };
-			absF = force(delta_coord);
-			W[0] += absF * delta_coord[0];
-			W[1] += absF * delta_coord[1];
-			W[2] += absF * delta_coord[2];
-
-			deltaW += EnergyDependence(pow(delta_coord[0], 2) + pow(delta_coord[1], 2) + pow(delta_coord[2], 2));
-
-		}
-		element->Starting_conditions_for_W(W);
-
-	}
-
-	for (auto element = ElementList.begin(); element != ElementList.end(); element++)
-	{
-		element->Cout(timer);
-		element->Move();
-		element->periodic_table();
-
-
-
-
-		if (timer * delta_t < relaxTime * endtime) {
-
-			element->ThermoV();
-		}
-
-	}
-
-	return deltaW;
-
-
-}
 
 void ElementarElement::periodic_table()
 {
@@ -168,25 +91,6 @@ void ElementarElement::Cout(int t)
 	std::cout << "| Wx : " << Wx << "Wy : " << Wy << "Wz = " << Wz << '\n';
 }
 
-
-float ElementarElement::Force(ElementarElement* element)
-{
-	float absF = 0.0;
-	float F[3] = { 0.0,0.0,0.0 };
-	if (pow((x - element->x), 2) + pow((y - element->y), 2) + pow((z - element->z), 2) < FinishForceRo) {
-		absF = ForceDependence(pow((x - element->x), 2) + pow((y - element->y), 2) + pow((z - element->z), 2));
-		std::tie(F[0], F[1], F[2]) = std::make_tuple(absF * (x - element->x), absF * (y - element->y), absF * (z - element->z));
-	}
-
-	float W0 = EnergyDependence(pow(FinishForceRo, 1 / 2));
-	float deltaW = EnergyDependence(pow((x - element->x), 2) + pow((y - element->y), 2) + pow((z - element->z), 2));
-
-
-	std::tie(Wx, Wy, Wz) = std::make_tuple(Wx + F[0], Wy + F[1], Wz + F[2]);
-	std::tie(element->Wx, element->Wy, element->Wz) = std::make_tuple(element->Wx - F[0], element->Wy - F[1], element->Wz - F[2]);
-
-	return deltaW;
-}
 
 void ElementarElement::ThermoV()
 {
