@@ -27,6 +27,6 @@ const double bolzman = 1.38 * pow(10, -23);
 
 const int endtime = 1000;
 
-const double relaxTime = 400;
+const double relaxTime = 0.4;
 
 
