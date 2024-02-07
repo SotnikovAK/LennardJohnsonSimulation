@@ -12,11 +12,7 @@ static float ForceDependence(float ro) {
 	return f1 + f2;
 
 }
-static float EnergyDependence(float ro) {
-	float U = 0.0;
-	U = 4 * (pow(alpha, 12) / pow(ro, 6) - pow(alpha, 6) / pow(ro, 3));
-	return U;
-}
+
 
 
 
@@ -47,14 +43,14 @@ void ElementarElement::Move()
 {
 
 	float temp_cooard[3] = { x ,y ,z };
-	float squared_time = pow(dt,2);
+	float squared_time = pow(dt, 2);
 
-	std::tie(x, y, z) = std::make_tuple(2*x - x_1 + Wx * squared_time, 2 * y - y_1 + Wy * squared_time, 2 * z - z_1 + Wz * squared_time);
+	std::tie(x, y, z) = std::make_tuple(2 * x - x_1 + Wx * squared_time, 2 * y - y_1 + Wy * squared_time, 2 * z - z_1 + Wz * squared_time);
 	std::tie(Vx, Vy, Vz) = std::make_tuple(0.5 * (x - x_1) / dt, 0.5 * (y - y_1) / dt, 0.5 * (z - z_1) / dt);
 
 	std::tie(x_1, y_1, z_1) = std::make_tuple(temp_cooard[0], temp_cooard[1], temp_cooard[2]);
 
-	std::tie(DispX, DispY, DispZ) = std::make_tuple(Vx, Vy , Vz );
+	std::tie(DispX, DispY, DispZ) = std::make_tuple(Vx, Vy, Vz);
 }
 static float force(float delta_coord[3]) {
 	float absF = 0.0;
@@ -99,19 +95,18 @@ float moving(std::list<ElementarElement> ElementList, float Border, int timer)
 
 	for (auto element = ElementList.begin(); element != ElementList.end(); ++element) {
 		float W[3] = { 0.0f,0.0f,0.0f };
-		for (int k = 0; k < t ; ++k) {
+		for (int k = 0; k < t; ++k) {
 			float delta_coord[3] = { element->x - X[k], element->y - Y[k], element->z - Z[k] };
 			absF = force(delta_coord);
 			W[0] += absF * delta_coord[0];
 			W[1] += absF * delta_coord[1];
 			W[2] += absF * delta_coord[2];
-			
+
 			deltaW += EnergyDependence(pow(delta_coord[0], 2) + pow(delta_coord[1], 2) + pow(delta_coord[2], 2));
 
 		}
-		std::cout << "W values for element " << element->x << ", " << element->y << ", " << element->z << ": " << W[0] << ", " << W[1] << ", " << W[2] << std::endl;
 		element->Starting_conditions_for_W(W);
-		
+
 	}
 
 	for (auto element = ElementList.begin(); element != ElementList.end(); element++)
@@ -166,8 +161,8 @@ void ElementarElement::periodic_table()
 
 void ElementarElement::Cout(int t)
 {
-	
-	std::cout <<std::endl << "time = " << t << '\n';
+
+	std::cout << std::endl << "time = " << t << '\n';
 	std::cout << "x: " << x << " y: " << y << "z = " << z << '\n';
 	std::cout << "|  Vx: " << Vx << " Vy : " << Vy << "Vz = " << Vz << '\n';
 	std::cout << "| Wx : " << Wx << "Wy : " << Wy << "Wz = " << Wz << '\n';
@@ -180,7 +175,7 @@ float ElementarElement::Force(ElementarElement* element)
 	float F[3] = { 0.0,0.0,0.0 };
 	if (pow((x - element->x), 2) + pow((y - element->y), 2) + pow((z - element->z), 2) < FinishForceRo) {
 		absF = ForceDependence(pow((x - element->x), 2) + pow((y - element->y), 2) + pow((z - element->z), 2));
-		std::tie(F[0], F[1], F[2]) = std::make_tuple(absF* (x - element->x), absF* (y - element->y), absF * (z - element->z));
+		std::tie(F[0], F[1], F[2]) = std::make_tuple(absF * (x - element->x), absF * (y - element->y), absF * (z - element->z));
 	}
 
 	float W0 = EnergyDependence(pow(FinishForceRo, 1 / 2));
@@ -190,7 +185,7 @@ float ElementarElement::Force(ElementarElement* element)
 	std::tie(Wx, Wy, Wz) = std::make_tuple(Wx + F[0], Wy + F[1], Wz + F[2]);
 	std::tie(element->Wx, element->Wy, element->Wz) = std::make_tuple(element->Wx - F[0], element->Wy - F[1], element->Wz - F[2]);
 
-	return deltaW ;
+	return deltaW;
 }
 
 void ElementarElement::ThermoV()
@@ -224,7 +219,7 @@ float ElementarElement::KinEnergy()
 
 float* ElementarElement::Imp(float p[3])
 {
-	std::tie(p[0], p[1], p[2]) = std::make_tuple( Vx,  Vy,  Vz);
+	std::tie(p[0], p[1], p[2]) = std::make_tuple(Vx, Vy, Vz);
 
 	return p;
 }
@@ -239,7 +234,7 @@ float ElementarElement::Disp()
 float ElementarElement::absV()
 {
 	float vabs = 0.0;
-	vabs += sqrt(pow(Vx, 2) + pow(Vy, 2) + pow(Vz, 2)) ;
+	vabs += sqrt(pow(Vx, 2) + pow(Vy, 2) + pow(Vz, 2));
 	return vabs;
 }
 
@@ -265,7 +260,7 @@ void ElementarElement::CoordFor3D(Quaternion camerapos, Quaternion camerarotatio
 	else
 		shape.setRadius(R / distanceFromCamera * 1000);
 
-	shape.setPosition(draw_pos.getScreenPos() + sf::Vector2f(-R / distanceFromCamera * 1000/ Border, -R / distanceFromCamera * 1000 / Border));
+	shape.setPosition(draw_pos.getScreenPos() + sf::Vector2f(-R / distanceFromCamera * 1000 / Border, -R / distanceFromCamera * 1000 / Border));
 
 }
 
@@ -273,4 +268,3 @@ void ElementarElement::draw(sf::RenderWindow& window)
 {
 	window.draw(shape);
 }
-
