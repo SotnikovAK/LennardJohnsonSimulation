@@ -26,23 +26,26 @@ ElementarElement::ElementarElement(float x_, float y_, float z_, float Vx_, floa
 	std::tie(Vx, Vy, Vz) = std::make_tuple(Vx_, Vy_, Vz_);
 
 	std::tie(x_1, y_1, z_1) = std::make_tuple(x + Vx * dt, y + Vy * dt, z + Vz * dt);
-	std::tie(DispX, DispY, DispZ) = std::make_tuple(0, 0, 0);
+	std::tie(DispX, DispY, DispZ) = std::make_tuple(0.0f, 0.0f, 0.0f);
+	std::tie(Wx, Wy, Wz) = std::make_tuple(0.0f, 0.0f, 0.0f);
+
 	dt = delta_t;
 	Border = land_;
 	Landscape = _la;
 
 }
 
-void ElementarElement::Starting_conditions_for_W()
+void ElementarElement::Starting_conditions_for_W(float W[3])
 {
-	Wx = 0;
-	Wy = 0;
-	Wz = 0;
+	Wx = W[0];
+	Wy = W[1];
+	Wz = W[2];
 }
 
 
 void ElementarElement::Move()
 {
+
 	float temp_cooard[3] = { x ,y ,z };
 	float squared_time = pow(dt,2);
 
@@ -53,8 +56,86 @@ void ElementarElement::Move()
 
 	std::tie(DispX, DispY, DispZ) = std::make_tuple(Vx, Vy , Vz );
 }
+static float force(float delta_coord[3]) {
+	float absF = 0.0;
+	if (pow(delta_coord[0], 2) + pow(delta_coord[1], 2) + pow(delta_coord[2], 2) < FinishForceRo and pow(delta_coord[0], 2) + pow(delta_coord[1], 2) + pow(delta_coord[2], 2) > 0) {
+		absF = ForceDependence(pow(delta_coord[0], 2) + pow(delta_coord[1], 2) + pow(delta_coord[2], 2));
+	}
+	return absF;
+}
 
-void ElementarElement::PeriodCoord()
+
+float moving(std::list<ElementarElement> ElementList, float Border, int timer)
+{
+
+	float A[9][2] = {
+		{-1.0, -1.0},
+		{-1.0, 0.0},
+		{-1.0, 1.0},
+		{0.0, -1.0},
+		{0.0,0.0},
+		{0.0, 1.0},
+		{1.0, -1.0},
+		{1.0, 0.0},
+		{1.0, 1.0},
+	};
+	float B[3] = { -1.0,0.0,1.0 };
+	float deltaW = 0.0f;
+	float absF = 0.0f;
+
+	float X[max_n];
+	float Y[max_n];
+	float Z[max_n];
+
+	int t = 0;
+	for (auto element = ElementList.begin(); element != ElementList.end(); ++element) {
+		for (int i = 0; i < 3; ++i) {
+			for (int k = 0; k < 9; ++k) {
+				std::tie(X[t], Y[t], Z[t]) = std::make_tuple(A[k][0] * Border + element->x, A[k][1] * Border + element->y, B[i] * Border + element->z);
+				++t;
+			}
+		}
+	}
+
+	for (auto element = ElementList.begin(); element != ElementList.end(); ++element) {
+		float W[3] = { 0.0f,0.0f,0.0f };
+		for (int k = 0; k < t ; ++k) {
+			float delta_coord[3] = { element->x - X[k], element->y - Y[k], element->z - Z[k] };
+			absF = force(delta_coord);
+			W[0] += absF * delta_coord[0];
+			W[1] += absF * delta_coord[1];
+			W[2] += absF * delta_coord[2];
+			
+			deltaW += EnergyDependence(pow(delta_coord[0], 2) + pow(delta_coord[1], 2) + pow(delta_coord[2], 2));
+
+		}
+		std::cout << "W values for element " << element->x << ", " << element->y << ", " << element->z << ": " << W[0] << ", " << W[1] << ", " << W[2] << std::endl;
+		element->Starting_conditions_for_W(W);
+		
+	}
+
+	for (auto element = ElementList.begin(); element != ElementList.end(); element++)
+	{
+		element->Cout(timer);
+		element->Move();
+		element->periodic_table();
+
+
+
+
+		if (timer * delta_t < relaxTime * endtime) {
+
+			element->ThermoV();
+		}
+
+	}
+
+	return deltaW;
+
+
+}
+
+void ElementarElement::periodic_table()
 {
 	float temp_coord[3] = { x ,y ,z };
 	float temp_coord_[3] = { x_1 ,y_1 ,z_1 };
@@ -83,9 +164,13 @@ void ElementarElement::PeriodCoord()
 
 
 
-void ElementarElement::Cout()
+void ElementarElement::Cout(int t)
 {
-	std::cout << "x: " << x << " y: " << y << "z = " << z << "|  Vx: " << Vx << " Vy : " << Vy << "| Wx : " << Wx << "Wy : " << Wy << '\n';
+	
+	std::cout <<std::endl << "time = " << t << '\n';
+	std::cout << "x: " << x << " y: " << y << "z = " << z << '\n';
+	std::cout << "|  Vx: " << Vx << " Vy : " << Vy << "Vz = " << Vz << '\n';
+	std::cout << "| Wx : " << Wx << "Wy : " << Wy << "Wz = " << Wz << '\n';
 }
 
 
@@ -100,7 +185,6 @@ float ElementarElement::Force(ElementarElement* element)
 
 	float W0 = EnergyDependence(pow(FinishForceRo, 1 / 2));
 	float deltaW = EnergyDependence(pow((x - element->x), 2) + pow((y - element->y), 2) + pow((z - element->z), 2));
-
 
 
 	std::tie(Wx, Wy, Wz) = std::make_tuple(Wx + F[0], Wy + F[1], Wz + F[2]);
@@ -161,6 +245,7 @@ float ElementarElement::absV()
 
 
 
+
 void ElementarElement::CoordFor3D(Quaternion camerapos, Quaternion camerarotation)
 {
 
@@ -188,3 +273,4 @@ void ElementarElement::draw(sf::RenderWindow& window)
 {
 	window.draw(shape);
 }
+
